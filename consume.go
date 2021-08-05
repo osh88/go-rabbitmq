@@ -145,7 +145,10 @@ func (consumer Consumer) startGoroutinesWithRetries(
 	for {
 		consumer.logger.Printf("waiting %s seconds to attempt to start consumer goroutines", backoffTime)
 		time.Sleep(backoffTime)
-		backoffTime *= 2
+		// Max 512s (~8.5min)
+		if backoffTime < 512*time.Second {
+			backoffTime *= 2
+		}
 		err := consumer.startGoroutines(
 			handler,
 			queue,
